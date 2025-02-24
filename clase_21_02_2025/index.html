@@ -3,23 +3,21 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Page Title</title>
+    <title>Sanitización de HTML</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" media="screen" href="CSS/estilo.css" />
-    <script src="validar.js" defer></script>
+    <script src="sanitizar.js" defer></script>
 </head>
 <body>
     <div class="principal">
     <form method="get" name="registro" onsubmit="return validar(this)" action="index.html">
-       
+        
         <label>Nombre:</label>
         <input class="cajas" type="text" name="nombre" id="nombre"/>
-        <br>
-        <br>
+        <br><br>
         <label>Edad:</label>
         <input class="cajas" type="number" name="edad" id="edad"/>
-        <br>
-        <br>
+        <br><br>
         <legend>Selecciona sexo:</legend>
         
         <blockquote>  
@@ -30,7 +28,7 @@
             <input class="cajas" type="radio" name="sexo" id="masculino" value="masculino"/>
         </blockquote> 
         
-        <label >
+        <label>
             <span>Deporte favorito:</span>
             <select id="deporte" name="deporte">
               <option value="futbol">Futbol</option>
@@ -43,8 +41,37 @@
 
         <input class="boton" type="submit" id="enviar" value="Enviar">
         <input class="boton" type="reset" id="reset" value="Reset">
-
     </form>
     </div>
+
+    <script>
+        function validar(form) {
+            var nombre = form.nombre.value.trim();
+            if (nombre === "") {
+                alert("Por favor, ingrese su nombre.");
+                return false;
+            }
+
+            var edad = form.edad.value.trim();
+            if (edad === "" || isNaN(edad) || edad <= 0) {
+                alert("Por favor, ingrese una edad válida.");
+                return false;
+            }
+
+            var sexo = form.sexo.value;
+            if (sexo === "") {
+                alert("Por favor, seleccione su sexo.");
+                return false;
+            }
+
+            var deporte = form.deporte.value;
+            if (deporte === "ninguno") {
+                alert("Por favor, seleccione un deporte favorito.");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
 </body>
 </html>
