@@ -1,4 +1,6 @@
 function validar(form) {
+
+
     // Sanitizar entradas
     form.nombre.value = sanitizeHTML(form.nombre.value);
     form.edad.value = sanitizeHTML(form.edad.value);
@@ -6,7 +8,7 @@ function validar(form) {
     // Validar nombre
     var nombre = form.nombre.value.trim();
     if (nombre === "") {
-        alert("Por favor, ingrese su nombre.");
+        alert("Por favor, ingrese su nombre o no ponga etiquetas <>.");
         return false;
     }
 
@@ -31,11 +33,16 @@ function validar(form) {
         return false;
     }
 
-    // Si todo es válido
+    // Si todo es válido, muestra el mensaje en la consola
+    alert("Los datos son correctos");
+    
     return true;
 }
 
-// Función para eliminar etiquetas <script> y su contenido
 function sanitizeHTML(input) {
-    return input.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
+    if (/<.*?>/g.test(input)) { // Detecta si hay etiquetas HTML
+        alert("No se permiten etiquetas HTML en este campo.");
+        return ""; // Vacía el campo si se detectan etiquetas
+    }
+    return input; // Devuelve el texto si no tiene etiquetas
 }
