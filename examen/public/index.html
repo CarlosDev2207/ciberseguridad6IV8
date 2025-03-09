@@ -1,57 +1,78 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Backrooms</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backrooms</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Registro de Nivel de Backroom</h1>
+  <h1>Registro de Nivel de Backroom</h1>
+  
+  <div id="alerta"></div>
+
+  <!-- Formulario para agregar Backroom -->
+  <form id="formulario-backroom">
+    <label for="nivel_backroom">Nivel de Backroom:</label>
+    <input type="text" id="nivel_backroom" name="nivel_backroom" required>
     
-    <div id="alerta"></div>
+    <label for="entidades_presentes">Entidades presentes:</label>
+    <input type="text" id="entidades_presentes" name="entidades_presentes">
+    
+    <label for="nivel_peligro">Nivel de Peligro:</label>
+    <input type="text" id="nivel_peligro" name="nivel_peligro">
+    
+    <label for="metodo_entrada">Método de entrada:</label>
+    <input type="text" id="metodo_entrada" name="metodo_entrada">
+    
+    <label for="estado_investigacion">Estado de Investigación:</label>
+    <input type="text" id="estado_investigacion" name="estado_investigacion">
+    
+    <label for="descripcion_backroom">Descripción del Backroom:</label>
+    <textarea id="descripcion_backroom" name="descripcion_backroom" required></textarea>
+    
+    <label for="iluminacion">Iluminación:</label>
+    <select id="iluminacion" name="iluminacion" required>
+      <option value="">Selecciona una opción</option>
+      <option value="Brillante">Brillante</option>
+      <option value="Tenue">Tenue</option>
+      <option value="Oscuro">Oscuro</option>
+    </select>
+    
+    <label for="anomalia_presente">Anomalía presente:</label>
+    <select id="anomalia_presente" name="anomalia_presente" required>
+      <option value="">Selecciona una opción</option>
+      <option value="Ninguna">Ninguna</option>
+      <option value="Visual">Visual</option>
+      <option value="Auditiva">Auditiva</option>
+      <option value="Física">Física</option>
+      <option value="Otra">Otra</option>
+    </select>
+    
+    <input type="submit" value="Agregar Backroom">
+  </form>
 
-    <!-- Formulario para agregar Backroom -->
-    <form id="formulario-backroom">
-        <label for="nivel_backroom">Nivel de Backroom:</label>
-        <input type="text" id="nivel_backroom" name="nivel_backroom" required>
-        
-        <label for="entidades_presentes">Entidades presentes:</label>
-        <input type="text" id="entidades_presentes" name="entidades_presentes">
-        
-        <label for="nivel_peligro">Nivel de Peligro:</label>
-        <input type="text" id="nivel_peligro" name="nivel_peligro">
-        
-        <label for="metodo_entrada">Método de entrada:</label>
-        <input type="text" id="metodo_entrada" name="metodo_entrada">
-        
-        <label for="estado_investigacion">Estado de Investigación:</label>
-        <input type="text" id="estado_investigacion" name="estado_investigacion">
-        
-        <label for="descripcion_backroom">Descripción del Backroom:</label>
-        <textarea id="descripcion_backroom" name="descripcion_backroom" required></textarea>
-        
-        <input type="submit" value="Agregar Backroom">
-    </form>
+  <!-- Tabla para mostrar los Backrooms -->
+  <table id="tabla-backrooms">
+    <thead>
+      <tr>
+        <th>Nivel de Backroom</th>
+        <th>Entidades presentes</th>
+        <th>Nivel de Peligro</th>
+        <th>Método de entrada</th>
+        <th>Estado de Investigación</th>
+        <th>Descripción del Backroom</th>
+        <th>Iluminación</th>
+        <th>Anomalía Presente</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Las filas se llenarán dinámicamente -->
+    </tbody>
+  </table>
 
-    <!-- Tabla para mostrar los Backrooms -->
-    <table id="tabla-backrooms">
-        <thead>
-            <tr>
-                <th>Nivel de Backroom</th>
-                <th>Entidades presentes</th>
-                <th>Nivel de Peligro</th>
-                <th>Método de entrada</th>
-                <th>Estado de Investigación</th>
-                <th>Descripción del Backroom</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Las filas se llenarán dinámicamente -->
-        </tbody>
-    </table>
-
-    <!-- Archivo JS de la parte frontend -->
-    <script src="main.js"></script>
+  <!-- Archivo JS de la parte frontend -->
+  <script src="main.js"></script>
 </body>
 </html>

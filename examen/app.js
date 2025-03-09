@@ -1,6 +1,6 @@
 // app.js (Backend - Node.js con Express usando PostgreSQL)
 const express = require("express");
-const { Pool } = require("pg");  // <-- Importa pg en lugar de mysql2
+const { Pool } = require("pg"); // Cliente PostgreSQL
 const bodyParser = require("body-parser");
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
@@ -12,30 +12,25 @@ const DOMPurify = createDOMPurify(window);
 
 const app = express();
 
-// Crea un pool de conexiones a PostgreSQL
-// Usamos la variable de entorno DATABASE_URL (la configurarás en Render y/o en tu sistema local).
+// Conexión a la base de datos mediante Pool
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || "postgres://usuario:contraseña@host:puerto/basedatos",
-  ssl: {
-    rejectUnauthorized: false // Requerido para conectarse a Neon
-  }
+  ssl: { rejectUnauthorized: false }
 });
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static("public")); // Archivos index.html, styles.css y main.js en la carpeta "public"
+app.use(express.static("public")); // Archivos en la carpeta "public"
 
-// Función auxiliar para detectar etiquetas HTML en un campo
+// Función auxiliar para detectar etiquetas HTML
 function contieneEtiquetas(cadena) {
   return /<.*?>/g.test(String(cadena));
 }
 
-// Endpoint para obtener todos los Backrooms
+// Endpoint GET: Obtener todos los Backrooms
 app.get("/backrooms", async (req, res) => {
   try {
-    // Ejecutamos la consulta con el pool de PostgreSQL
     const result = await pool.query("SELECT * FROM backrooms");
-    // result.rows contendrá las filas retornadas
     res.json(result.rows);
   } catch (err) {
     console.error("Error al obtener los Backrooms:", err);
@@ -43,7 +38,7 @@ app.get("/backrooms", async (req, res) => {
   }
 });
 
-// Endpoint para crear un nuevo Backroom con validación de etiquetas HTML
+// Endpoint POST: Crear un nuevo Backroom con validación y nuevos campos
 app.post("/backrooms", async (req, res) => {
   const {
     nivel_backroom,
@@ -51,38 +46,39 @@ app.post("/backrooms", async (req, res) => {
     nivel_peligro,
     metodo_entrada,
     estado_investigacion,
-    descripcion_backroom
+    descripcion_backroom,
+    iluminacion,
+    anomalia_presente
   } = req.body;
 
-  // Validar campos obligatorios
-  if (!nivel_backroom || !descripcion_backroom) {
-    return res.status(400).send("Nivel de Backroom y descripción son obligatorios.");
+  if (!nivel_backroom || !descripcion_backroom || !iluminacion || !anomalia_presente) {
+    return res.status(400).send("Nivel de Backroom, descripción, iluminación y anomalía presente son obligatorios.");
   }
 
-  // Verificar si alguno de los campos contiene etiquetas HTML
   const campos = {
     nivel_backroom,
     entidades_presentes,
     nivel_peligro,
     metodo_entrada,
     estado_investigacion,
-    descripcion_backroom
+    descripcion_backroom,
+    iluminacion,
+    anomalia_presente
   };
+
   for (const key in campos) {
     if (contieneEtiquetas(campos[key])) {
       return res.status(400).send("No puedes poner etiquetas HTML en los campos.");
     }
   }
 
-  // Sanitizar la descripción para prevenir inyección de código malicioso
   const sanitizedDescripcion = DOMPurify.sanitize(descripcion_backroom);
 
   try {
-    // Consulta parametrizada para insertar datos
     const query = `
       INSERT INTO backrooms
-      (nivel_backroom, entidades_presentes, nivel_peligro, metodo_entrada, estado_investigacion, descripcion_backroom)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      (nivel_backroom, entidades_presentes, nivel_peligro, metodo_entrada, estado_investigacion, descripcion_backroom, iluminacion, anomalia_presente)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     `;
     await pool.query(query, [
       nivel_backroom,
@@ -90,7 +86,9 @@ app.post("/backrooms", async (req, res) => {
       nivel_peligro,
       metodo_entrada,
       estado_investigacion,
-      sanitizedDescripcion
+      sanitizedDescripcion,
+      iluminacion,
+      anomalia_presente
     ]);
     res.send("Backroom creado con éxito.");
   } catch (err) {
@@ -99,7 +97,22 @@ app.post("/backrooms", async (req, res) => {
   }
 });
 
-// Iniciar el servidor en el puerto 3000
+// Endpoint DELETE: Eliminar un Backroom por ID
+app.delete("/backrooms/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query("DELETE FROM backrooms WHERE id = $1", [id]);
+    if (result.rowCount === 0) {
+      return res.status(404).send("Backroom no encontrado.");
+    }
+    res.send("Backroom eliminado con éxito.");
+  } catch (err) {
+    console.error("Error al eliminar el Backroom:", err);
+    res.status(500).send("Error al eliminar el Backroom.");
+  }
+});
+
+// Iniciar el servidor
 app.listen(3000, () => {
   console.log("Servidor escuchando en el puerto 3000");
 });
