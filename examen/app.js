@@ -40,7 +40,7 @@ app.get("/backrooms", async (req, res) => {
 
 // Endpoint POST: Crear un nuevo Backroom con validación y nuevos campos
 app.post("/backrooms", async (req, res) => {
-  const {
+  let {
     nivel_backroom,
     entidades_presentes,
     nivel_peligro,
@@ -51,8 +51,20 @@ app.post("/backrooms", async (req, res) => {
     anomalia_presente
   } = req.body;
 
-  if (!nivel_backroom || !descripcion_backroom || !iluminacion || !anomalia_presente) {
+  // Validar campos obligatorios
+  if (
+    nivel_backroom === undefined ||
+    !descripcion_backroom ||
+    !iluminacion ||
+    !anomalia_presente
+  ) {
     return res.status(400).send("Nivel de Backroom, descripción, iluminación y anomalía presente son obligatorios.");
+  }
+
+  // Convertir nivel_backroom a número
+  nivel_backroom = parseInt(nivel_backroom, 10);
+  if (isNaN(nivel_backroom)) {
+    return res.status(400).send("El nivel de Backroom debe ser un número.");
   }
 
   const campos = {

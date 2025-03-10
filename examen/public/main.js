@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
     // Función para validar todos los campos del formulario
     function validarCampos(form) {
-      const inputs = form.querySelectorAll("input[type='text'], textarea, select");
+      const inputs = form.querySelectorAll("input[type='text'], input[type='number'], textarea, select");
       for (let input of inputs) {
         input.value = sanitizeHTML(input.value);
         if (input.value.trim() === "") {
@@ -72,6 +72,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!validarCampos(formulario)) return;
       const formData = new FormData(formulario);
       const data = Object.fromEntries(formData.entries());
+      // Convertir nivel_backroom a número
+      data.nivel_backroom = parseInt(data.nivel_backroom, 10);
       fetch("/backrooms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
