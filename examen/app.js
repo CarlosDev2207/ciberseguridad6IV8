@@ -6,7 +6,7 @@ const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 const createDOMPurify = require("dompurify");
 const session = require("express-session");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 const app = express();
 
