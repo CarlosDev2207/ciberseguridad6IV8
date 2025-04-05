@@ -383,3 +383,36 @@ app.delete("/backrooms/:id", async (req, res) => {
 app.listen(3000, () => {
   console.log("Servidor escuchando en el puerto 3000");
 });
+
+
+
+
+
+
+base de datos:
+
+CREATE TABLE backrooms (
+    id SERIAL PRIMARY KEY,
+    nivel_backroom VARCHAR(255) NOT NULL,
+    entidades_presentes VARCHAR(255),
+    nivel_peligro VARCHAR(100),
+    metodo_entrada VARCHAR(255),
+    estado_investigacion VARCHAR(255),
+    descripcion_backroom TEXT NOT NULL
+);
+
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'backrooms';
+
+ALTER TABLE backrooms
+ADD COLUMN iluminacion VARCHAR(100),
+ADD COLUMN anomalia_presente VARCHAR(100);
+
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'backrooms';
+
+ALTER TABLE backrooms
+ALTER COLUMN nivel_backroom TYPE INTEGER USING nivel_backroom::integer,
+ALTER COLUMN descripcion_backroom TYPE VARCHAR(500);

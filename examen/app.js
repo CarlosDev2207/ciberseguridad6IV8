@@ -6,7 +6,7 @@ const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 const createDOMPurify = require("dompurify");
 const session = require("express-session");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcryptjs");  // Se usa bcryptjs para mayor compatibilidad
 
 const app = express();
 
@@ -53,7 +53,7 @@ app.get("/login", (req, res) => {
   res.sendFile(__dirname + "/public/login.html");
 });
 
-// Procesar el login
+// Procesar el login y redirigir al index al ser exitoso
 app.post("/login", async (req, res) => {
   let { username, password } = req.body;
   
@@ -73,7 +73,7 @@ app.post("/login", async (req, res) => {
     }
     const user = result.rows[0];
     
-    // Comparar contraseña con bcrypt
+    // Comparar contraseña con bcryptjs
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).send("Credenciales inválidas.");
@@ -81,7 +81,8 @@ app.post("/login", async (req, res) => {
     
     // Almacenar el ID del usuario en la sesión
     req.session.userId = user.id;
-    res.send("Login exitoso.");
+    // Redirigir al index.html (carpeta public)
+    res.redirect("/");
   } catch (err) {
     console.error("Error en login:", err);
     res.status(500).send("Error en el servidor.");
@@ -94,14 +95,14 @@ app.get("/logout", (req, res) => {
   res.send("Sesión cerrada.");
 });
 
-// (Opcional) Rutas de registro de usuarios
+// Rutas de registro de usuarios
 
 // Mostrar la página de registro
 app.get("/register", (req, res) => {
   res.sendFile(__dirname + "/public/register.html");
 });
 
-// Procesar el registro
+// Procesar el registro y redirigir al login
 app.post("/register", async (req, res) => {
   let { username, password } = req.body;
   
@@ -125,14 +126,15 @@ app.post("/register", async (req, res) => {
       return res.status(400).send("El usuario ya existe.");
     }
     
-    // Hash de la contraseña
+    // Hash de la contraseña con bcryptjs
     const hashedPassword = await bcrypt.hash(password, 10);
     
     // Insertar el nuevo usuario usando consulta parametrizada
     const insertQuery = "INSERT INTO users (username, password) VALUES ($1, $2)";
     await pool.query(insertQuery, [username, hashedPassword]);
     
-    res.send("Usuario registrado exitosamente.");
+    // Redirigir al login después de un registro exitoso
+    res.redirect("/login");
   } catch (err) {
     console.error("Error en registro:", err);
     res.status(500).send("Error en el servidor.");
