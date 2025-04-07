@@ -6,7 +6,7 @@ const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 const createDOMPurify = require("dompurify");
 const session = require("express-session");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");  // Se usa bcryptjs para mayor compatibilidad
 
 const app = express();
 
@@ -53,7 +53,7 @@ app.get("/login", (req, res) => {
   res.sendFile(__dirname + "/public/login.html");
 });
 
-// Procesar el login
+// Procesar el login y redirigir al index al ser exitoso
 app.post("/login", async (req, res) => {
   let { username, password } = req.body;
   
@@ -73,7 +73,7 @@ app.post("/login", async (req, res) => {
     }
     const user = result.rows[0];
     
-    // Comparar contraseña con bcrypt
+    // Comparar contraseña con bcryptjs
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).send("Credenciales inválidas.");
@@ -81,27 +81,32 @@ app.post("/login", async (req, res) => {
     
     // Almacenar el ID del usuario en la sesión
     req.session.userId = user.id;
-    res.send("Login exitoso.");
+    // Redirigir al index.html (carpeta public)
+    res.redirect("/");
   } catch (err) {
     console.error("Error en login:", err);
     res.status(500).send("Error en el servidor.");
   }
 });
 
-// Ruta para cerrar sesión
+// Ruta para cerrar sesión y redirigir al login
 app.get("/logout", (req, res) => {
-  req.session.destroy();
-  res.send("Sesión cerrada.");
+  req.session.destroy(err => {
+    if (err) {
+      return res.status(500).send("Error al cerrar sesión.");
+    }
+    res.redirect("/login");
+  });
 });
 
-// (Opcional) Rutas de registro de usuarios
+// Rutas de registro de usuarios
 
 // Mostrar la página de registro
 app.get("/register", (req, res) => {
   res.sendFile(__dirname + "/public/register.html");
 });
 
-// Procesar el registro
+// Procesar el registro y redirigir al login
 app.post("/register", async (req, res) => {
   let { username, password } = req.body;
   
@@ -118,6 +123,12 @@ app.post("/register", async (req, res) => {
     return res.status(400).send("No se permiten etiquetas HTML.");
   }
   
+  // Lista blanca: solo se permiten letras, números, guiones bajos y puntos
+  const usernameRegex = /^[a-zA-Z0-9_.]+$/;
+  if (!usernameRegex.test(username)) {
+    return res.status(400).send("El usuario solo puede contener letras, números, guiones bajos y puntos.");
+  }
+  
   try {
     // Verificar si el usuario ya existe
     const checkUser = await pool.query("SELECT * FROM users WHERE username = $1", [username]);
@@ -125,14 +136,15 @@ app.post("/register", async (req, res) => {
       return res.status(400).send("El usuario ya existe.");
     }
     
-    // Hash de la contraseña
+    // Hash de la contraseña con bcryptjs
     const hashedPassword = await bcrypt.hash(password, 10);
     
     // Insertar el nuevo usuario usando consulta parametrizada
     const insertQuery = "INSERT INTO users (username, password) VALUES ($1, $2)";
     await pool.query(insertQuery, [username, hashedPassword]);
     
-    res.send("Usuario registrado exitosamente.");
+    // Redirigir al login después de un registro exitoso
+    res.redirect("/login");
   } catch (err) {
     console.error("Error en registro:", err);
     res.status(500).send("Error en el servidor.");
@@ -242,148 +254,6 @@ app.delete("/backrooms/:id", requireAuth, async (req, res) => {
 app.listen(3000, () => {
   console.log("Servidor escuchando en el puerto 3000");
 });
-
-
-
-
-
-
-
-APP.JS ORIGINAL
-
-
-
-// app.js (Backend - Node.js con Express usando PostgreSQL)
-const express = require("express");
-const { Pool } = require("pg"); // Cliente PostgreSQL
-const bodyParser = require("body-parser");
-const jsdom = require("jsdom");
-const { JSDOM } = jsdom;
-const createDOMPurify = require("dompurify");
-
-// Configuración de DOMPurify para sanitizar entradas
-const window = new JSDOM("").window;
-const DOMPurify = createDOMPurify(window);
-
-const app = express();
-
-// Conexión a la base de datos mediante Pool
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || "postgres://usuario:contraseña@host:puerto/basedatos",
-  ssl: { rejectUnauthorized: false }
-});
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static("public")); // Archivos en la carpeta "public"
-
-// Función auxiliar para detectar etiquetas HTML
-function contieneEtiquetas(cadena) {
-  return /<.*?>/g.test(String(cadena));
-}
-
-// Endpoint GET: Obtener todos los Backrooms
-app.get("/backrooms", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT * FROM backrooms");
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Error al obtener los Backrooms:", err);
-    res.status(500).send("Error al obtener los Backrooms.");
-  }
-});
-
-// Endpoint POST: Crear un nuevo Backroom con validación y nuevos campos
-app.post("/backrooms", async (req, res) => {
-  let {
-    nivel_backroom,
-    entidades_presentes,
-    nivel_peligro,
-    metodo_entrada,
-    estado_investigacion,
-    descripcion_backroom,
-    iluminacion,
-    anomalia_presente
-  } = req.body;
-
-  // Validar campos obligatorios
-  if (
-    nivel_backroom === undefined ||
-    !descripcion_backroom ||
-    !iluminacion ||
-    !anomalia_presente
-  ) {
-    return res.status(400).send("Nivel de Backroom, descripción, iluminación y anomalía presente son obligatorios.");
-  }
-
-  // Convertir nivel_backroom a número
-  nivel_backroom = parseInt(nivel_backroom, 10);
-  if (isNaN(nivel_backroom)) {
-    return res.status(400).send("El nivel de Backroom debe ser un número.");
-  }
-
-  const campos = {
-    nivel_backroom,
-    entidades_presentes,
-    nivel_peligro,
-    metodo_entrada,
-    estado_investigacion,
-    descripcion_backroom,
-    iluminacion,
-    anomalia_presente
-  };
-
-  for (const key in campos) {
-    if (contieneEtiquetas(campos[key])) {
-      return res.status(400).send("No puedes poner etiquetas HTML en los campos.");
-    }
-  }
-
-  const sanitizedDescripcion = DOMPurify.sanitize(descripcion_backroom);
-
-  try {
-    const query = `
-      INSERT INTO backrooms
-      (nivel_backroom, entidades_presentes, nivel_peligro, metodo_entrada, estado_investigacion, descripcion_backroom, iluminacion, anomalia_presente)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-    `;
-    await pool.query(query, [
-      nivel_backroom,
-      entidades_presentes,
-      nivel_peligro,
-      metodo_entrada,
-      estado_investigacion,
-      sanitizedDescripcion,
-      iluminacion,
-      anomalia_presente
-    ]);
-    res.send("Backroom creado con éxito.");
-  } catch (err) {
-    console.error("Error al crear el Backroom:", err);
-    res.status(500).send("Error al crear el Backroom.");
-  }
-});
-
-// Endpoint DELETE: Eliminar un Backroom por ID
-app.delete("/backrooms/:id", async (req, res) => {
-  const { id } = req.params;
-  try {
-    const result = await pool.query("DELETE FROM backrooms WHERE id = $1", [id]);
-    if (result.rowCount === 0) {
-      return res.status(404).send("Backroom no encontrado.");
-    }
-    res.send("Backroom eliminado con éxito.");
-  } catch (err) {
-    console.error("Error al eliminar el Backroom:", err);
-    res.status(500).send("Error al eliminar el Backroom.");
-  }
-});
-
-// Iniciar el servidor
-app.listen(3000, () => {
-  console.log("Servidor escuchando en el puerto 3000");
-});
-
 
 
 

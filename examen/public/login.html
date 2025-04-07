@@ -2,26 +2,23 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Iniciar Sesión</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <h1>Iniciar Sesión</h1>
-  <div id="alerta"></div>
-  <form id="formulario-login" method="POST" action="/login">
+  <form id="formulario-login">
     <label for="username">Usuario:</label>
     <input type="text" id="username" name="username" required>
-    
+
     <label for="password">Contraseña:</label>
     <input type="password" id="password" name="password" required>
-    
+
     <input type="submit" value="Entrar">
   </form>
-  
-  <p>¿No tienes una cuenta? <a href="/register">Regístrate aquí</a></p>
-  
-  <script>
-    // Aquí puedes agregar validaciones adicionales en el cliente si lo deseas.
-  </script>
+  <div id="alerta"></div>
+  <p>¿No tienes cuenta? <a href="/register">Regístrate aquí</a></p>
+  <script src="login.js"></script>
 </body>
 </html>
