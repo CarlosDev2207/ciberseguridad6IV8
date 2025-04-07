@@ -123,6 +123,12 @@ app.post("/register", async (req, res) => {
     return res.status(400).send("No se permiten etiquetas HTML.");
   }
   
+  // Lista blanca: solo se permiten letras, números, guiones bajos y puntos
+  const usernameRegex = /^[a-zA-Z0-9_.]+$/;
+  if (!usernameRegex.test(username)) {
+    return res.status(400).send("El usuario solo puede contener letras, números, guiones bajos y puntos.");
+  }
+  
   try {
     // Verificar si el usuario ya existe
     const checkUser = await pool.query("SELECT * FROM users WHERE username = $1", [username]);
