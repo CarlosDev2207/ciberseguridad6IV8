@@ -9,15 +9,16 @@
 <body>
   <h1>Registro de Nivel de Backroom</h1>
   
-  <!-- Botón para ir a la página de inicio de sesión -->
+  <!-- Botón para iniciar sesión -->
   <button type="button" onclick="window.location.href='/login'" class="btn-login">Iniciar Sesión</button>
+  <!-- Botón para cerrar sesión -->
+  <button type="button" onclick="window.location.href='/logout'" class="btn-logout">Cerrar Sesión</button>
   
   <div id="alerta"></div>
 
   <!-- Formulario para agregar Backroom -->
   <form id="formulario-backroom">
     <label for="nivel_backroom">Nivel de Backroom:</label>
-    <!-- Se cambia a tipo number -->
     <input type="number" id="nivel_backroom" name="nivel_backroom" min="1" required>
     
     <label for="entidades_presentes">Entidades presentes:</label>

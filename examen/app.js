@@ -89,10 +89,14 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Ruta para cerrar sesión
+// Ruta para cerrar sesión y redirigir al login
 app.get("/logout", (req, res) => {
-  req.session.destroy();
-  res.send("Sesión cerrada.");
+  req.session.destroy(err => {
+    if (err) {
+      return res.status(500).send("Error al cerrar sesión.");
+    }
+    res.redirect("/login");
+  });
 });
 
 // Rutas de registro de usuarios
